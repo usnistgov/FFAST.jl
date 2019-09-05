@@ -1,0 +1,12 @@
+name = "FFAST"
+uuid = "10506e09-08cd-5f0b-aee5-631de1bcc925"
+version = "0.0.1"
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
+
