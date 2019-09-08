@@ -3,6 +3,13 @@ using Gumbo
 using CSV
 using DataFrames
 
+"""
+    scrape(z::Int)
+Scrapes FFAST data from the NIST website by downloading by element the
+associated HTML page and parsing the content to extract the various different
+values.  Not exported as part of FFAST but provided to assist with downloading
+updated values if they should become available.
+"""
 function scrape(z::Int)
     sciNot = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?"
     numNot = r"[-+]?[0-9]*\.?[0-9]+"
@@ -62,4 +69,4 @@ function scrape(z::Int)
     CSV.write("c:\\Users\\nritchie\\.julia\\dev\\FFAST\\data\\mac[$(z)].csv", df1)
 end
 
-for z in 1:92 scape(z) end
+for z in 1:92 scrape(z) end

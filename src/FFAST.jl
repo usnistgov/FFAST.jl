@@ -15,6 +15,6 @@ export ffastF
 export ffastMACpe
 export ffastMACci
 export ffastMACtot
-export ffastMACμρK
+export ffastMACK
 
 end
