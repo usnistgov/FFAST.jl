@@ -1,18 +1,20 @@
 module FFAST
-export hello, domath
 
-"""
-    hello(who::String)
+include("base.jl")
 
-Return "Hello, `who`".
-"""
-hello(who::String) = "Hello, $who"
-
-"""
-    domath(x::Number)
-
-Return `x + 5`.
-"""
-domath(x::Number) = x + 5
+export ffastEdgeCount
+export ffastEdgeAvailable
+export ffastEdgeEnergy
+export ffastAtomicWeight
+export ffastCrossSectionFactor
+export ffastDensity
+export ffastEV
+export ffastRelativisticCorrections
+export ffastNuclearThompsonCorrection
+export ffastF
+export ffastMACpe
+export ffastMACci
+export ffastMACtot
+export ffastMACμρK
 
 end
