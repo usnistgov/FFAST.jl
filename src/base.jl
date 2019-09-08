@@ -71,7 +71,7 @@ linearInterp(x1, x2, y1, y2, x) =
     ((y2-y1)/(x2-x1))*(x-x1) + y1
 
 loglogInterp(x0, x1, y0, y1, x) =
-    exp(log(y1/y0)/log(x1/x0))*log(x/x0)+y0;
+    exp(log(y1/y0)/log(x1/x0)*log(x/x0)+log(y0))
 
 function ffastF(z::Int, energy::Float64)
     idx = ffastIndex(z,energy)
@@ -95,7 +95,7 @@ end
 function ffastMACtot(z::Int, energy::Float64)
     idx = ffastIndex(z,energy)
     ffd=FFASTData[z]
-    return linearInterp(ffd.energy[idx],ffd.energy[idx+1],FFASTData[z].macs[idx,:μρtot],FFASTData[z].macs[idx+1,:μρtot],energy)
+    return loglogInterp(ffd.energy[idx],ffd.energy[idx+1],FFASTData[z].macs[idx,:μρtot],FFASTData[z].macs[idx+1,:μρtot],energy)
 end
 
 function ffastMACμρK(z::Int, energy::Float64)

@@ -40,7 +40,7 @@ function scrape(z::Int)
         data0[7] = parseSN(headerNode[5][length(headerNode[5].children)-3].text)
     end
     for i in eachindex(shells) data0[1,7+i] = 1000.0*shells[i] end # in eV
-    shSym = [ :K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4, :N5, :N6, :N7, :O1, :O2, :O3, :O4, :O5, :O6, :O7, :O8, :O9, :P1, :P2, :P3   ]
+    shSym = [ :K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4, :N5, :N6, :N7, :O1, :O2, :O3, :O4, :O5, :O6, :O7, :O8, :O9   ]
     df0 = DataFrame(data0,[ :A, :xsec, :density, :ev, :rc1, :rc2, :nt, shSym[1:length(shells)]...])
     CSV.write("c:\\Users\\nritchie\\.julia\\dev\\FFAST\\data\\data[$(z)].csv", df0)
 
