@@ -11,7 +11,7 @@ function plotFfastMACs(z::Integer)
         Gadfly.Guide.title("Mass Attenuation Coefficients"),
         Gadfly.Guide.manual_color_key("Type", name, colors),
         Gadfly.Guide.xlabel("log(E) (eV)"), Guide.ylabel("log([μ/ρ]) (g/cm²)"),
-        Gadfly.Coord.cartesian(xmin=log10(50.0), xmax=log10(4.0e5), ymin=0.001))
+        Gadfly.Coord.cartesian(xmin=log10(50.0), xmax=log10(4.0e5), ymin=-2.0))
 end
 
 function plotFfastFF(z::Integer)
