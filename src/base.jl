@@ -3,22 +3,30 @@ using CSV
 
 struct FFASTElement
     energy::Vector{Float64} # in eV
-    data::DataFrame
-    macs::DataFrame
+    data::DataFrame # Supplemental data
+    macs::DataFrame # Form factor and MAC data
+    function FFASTElement(ev, sup, mac)
+        @assert all(ty->isequal(ty,Float64),eltypes(sup))
+        @assert all(ty->isequal(ty,Float64),eltypes(mac))
+        return new(ev,sup,mac)
+    end
 end
 
 
 """
     loadFFAST()
+
 Loads the necessary data from CSV files into an array of FFASTElement data items.
 """
 function loadFFAST()::Vector{FFASTElement}
     path = dirname(pathof(@__MODULE__))
     res=Vector{FFASTElement}()
     for z in 1:92
-        println("Loading z = $(z)")
+        # println("Loading z = $(z)")
         data = CSV.read("$(path)\\..\\data\\data[$(z)].csv")
+        data = mapcols(x->convert.(Float64,x), data) # ensure Float64
         macs = CSV.read("$(path)\\..\\data\\mac[$(z)].csv")
+        # mapcols(x->convert.(Float64,x), macs) # ensure Float64
         push!(res,FFASTElement(1000.0*macs[!,1],data,macs))
     end
     return res
@@ -29,6 +37,7 @@ ffastShells = ( :K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4, 
 
 """
     ffastEdgeCount(z::Int)
+
 Returns the number of edge energy values available for the element identified by atomic number, z.
 """
 ffastEdgeCount(z::Int) =
@@ -36,6 +45,7 @@ ffastEdgeCount(z::Int) =
 
 """
     ffastEdgeAvailable(z::Int, shell::Int)
+
 Is a value available for the specific shell's edge energy for the element identified by atomic number, z.
 """
 ffastEdgeAvailable(z::Int, shell::Int) =
@@ -43,13 +53,17 @@ ffastEdgeAvailable(z::Int, shell::Int) =
 
 """
     ffastEdgeEnergy(z::Int, shell::Int)
-The edge energy (in eV) for the specific element and shell.
+
+The edge energy (in eV) for the specific element and shell.  Chantler references these sources for the values
+  1) Bearden, J.A., Rev. Mod. Phys. 39, 78-124 (1967).
+  2) Bearden, J.A., Burr, A.F., Rev. Mod. Phys. 39, 125-142 (1967).
 """
 ffastEdgeEnergy(z::Int, shell::Int) =
     FFASTData[z].data[1,ffastShells[shell]]
 
 """
     ffastAtomicWeight(z::Int)
+
 The mean atomic weight for the specified element.
 """
 ffastAtomicWeight(z::Int) =
@@ -57,13 +71,15 @@ ffastAtomicWeight(z::Int) =
 
 """
     ffastCrossSectionFactor(z::Int)
+
 The constant factor to convert [μ/ρ] to cross section in cm<sup>2</sup>/atom.
 """
 ffastCrossSectionFactor(z::Int) =
-    FFASTData[z].data[1,:xsec]*10e-24
+    FFASTData[z].data[1,:xsec]*1.0e-24
 
 """
     ffastDensity(z::Int)
+
 Nominal value of the density of the element.
 """
 ffastDensity(z::Int) =
@@ -71,6 +87,9 @@ ffastDensity(z::Int) =
 
 """
     ffastEV(z::Int)
+
+E(eV) [μ/ρ](cm²/g) = f2(e/atom)  ×  ffastEV(z)
+
 Nominal value of the density of the element.
 """
 ffastEV(z::Int) =
@@ -78,6 +97,7 @@ ffastEV(z::Int) =
 
 """
     ffastRelativisticCorrections(z::Int)
+
 Relativistic correction estimates f<sub>rel</sub>(H82,3/5CL) in e/atom.
 Returns a tuple with two values.
 """
@@ -86,6 +106,7 @@ ffastRelativisticCorrections(z::Int) =
 
 """
     ffastNuclearThompsonCorrection(z::Int)
+
 Nuclear Thomson correction f<sub>NT</sub> in e/atom.
 """
 ffastNuclearThompsonCorrection(z::Int) =
@@ -116,9 +137,10 @@ loglogInterp(x0, x1, y0, y1, x) =
 
 """
     ffastF(z::Int, energy::Float64)
+
 Returns a tuple containing the form factors for the specified element and X-ray energy (in eV).
 """
-function ffastF(z::Int, energy::Float64)
+function ffastFF(z::Int, energy::Float64)
     idx = ffastIndex(z,energy)
     ffd=FFASTData[z]
     return ( loglogInterp(ffd.energy[idx],ffd.energy[idx+1],FFASTData[z].macs[idx,:f1],FFASTData[z].macs[idx+1,:f1],energy),
@@ -127,6 +149,7 @@ end
 
 """
     ffastMACpe(z::Int, energy::Float64)
+
 Returns the photoelectric attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACpe(z::Int, energy::Float64)
@@ -137,6 +160,7 @@ end
 
 """
     ffastMACci(z::Int, energy::Float64)
+
 Returns the coherent/incoherent attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACci(z::Int, energy::Float64)
@@ -147,6 +171,7 @@ end
 
 """
     ffastMACtot(z::Int, energy::Float64)
+
 Returns the total attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACtot(z::Int, energy::Float64)
@@ -157,6 +182,7 @@ end
 
 """
     ffastMACK(z::Int, energy::Float64)
+
 Returns the K-shell only attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACK(z::Int, energy::Float64)

@@ -31,7 +31,7 @@ function scrape(z::Int)
     else
         data0[1,2] = parseSN(headerNode[2][11].text) #  xsec ')  ×  9.12268E+01'
     end
-    data0[1,3] = parseN(headerNode[1][6].text) # density ')  = 7.4300'
+    data0[1,3] = parseSN(headerNode[1][6].text) # density ')  = 7.4300'
     if z==32
         data0[1,4] = parseSN(headerNode[3][13].text) # EV ')  ×  7.65960E+05'
     else
