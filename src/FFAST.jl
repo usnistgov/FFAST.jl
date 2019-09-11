@@ -26,7 +26,7 @@ export ffastUncertaintiesSolidLiquid # Fractional uncertainties for a solid or l
 export ffastUncertaintiesMonatomicGas # Fractional uncertainties for a monatomic gas
 
 function __init__()
-    @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("gadflysupport.jl")
+    @require Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004" include("gadflysupport.jl")
 end
 
 export plotFfastMACs # Plot [μ/ρ].  Only available if Gadfly is loaded.
