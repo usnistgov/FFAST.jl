@@ -13,11 +13,6 @@ struct FFASTElement
 end
 
 
-"""
-    loadFFAST()
-
-Loads the necessary data from CSV files into an array of FFASTElement data items.
-"""
 function loadFFAST()::Vector{FFASTElement}
     path = dirname(pathof(@__MODULE__))
     res=Vector{FFASTElement}()
@@ -72,7 +67,7 @@ ffastAtomicWeight(z::Int) =
 """
     ffastCrossSectionFactor(z::Int)
 
-The constant factor to convert [μ/ρ] to cross section in cm<sup>2</sup>/atom.
+The constant factor to convert [μ/ρ] to cross section in cm²/atom.
 """
 ffastCrossSectionFactor(z::Int) =
     FFASTData[z].data[1,:xsec]*1.0e-24
@@ -98,7 +93,7 @@ ffastEV(z::Int) =
 """
     ffastRelativisticCorrections(z::Int)
 
-Relativistic correction estimates f<sub>rel</sub>(H82,3/5CL) in e/atom.
+Relativistic correction estimates fᵣₑₗ(H82,3/5CL) in e/atom.
 Returns a tuple with two values.
 """
 ffastRelativisticCorrections(z::Int) =
@@ -107,7 +102,7 @@ ffastRelativisticCorrections(z::Int) =
 """
     ffastNuclearThompsonCorrection(z::Int)
 
-Nuclear Thomson correction f<sub>NT</sub> in e/atom.
+Nuclear Thomson correction fₙₜ</sub> in e/atom.
 """
 ffastNuclearThompsonCorrection(z::Int) =
     FFASTData[z].data[1,:nt]
@@ -150,7 +145,7 @@ end
 """
     ffastMACpe(z::Int, energy::Float64)
 
-Returns the photoelectric attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
+Returns the photoelectric attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACpe(z::Int, energy::Float64)
     idx = ffastIndex(z,energy)
@@ -161,7 +156,7 @@ end
 """
     ffastMACci(z::Int, energy::Float64)
 
-Returns the coherent/incoherent attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
+Returns the coherent/incoherent attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACci(z::Int, energy::Float64)
     idx = ffastIndex(z,energy)
@@ -172,7 +167,7 @@ end
 """
     ffastMACtot(z::Int, energy::Float64)
 
-Returns the total attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
+Returns the total attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACtot(z::Int, energy::Float64)
     idx = ffastIndex(z,energy)
@@ -183,7 +178,7 @@ end
 """
     ffastMACK(z::Int, energy::Float64)
 
-Returns the K-shell only attenuation coefficient in cm<sup>2</sup>/g for the specified element and X-ray energy (in eV).
+Returns the K-shell only attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
 function ffastMACK(z::Int, energy::Float64)
     idx = ffastIndex(z,energy)

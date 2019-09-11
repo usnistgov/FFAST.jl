@@ -1,4 +1,6 @@
-using Documenter, FFAST
+using Documenter
+using Gadfly
+using FFAST
 
 makedocs(modules = [FFAST], sitename = "FFAST.jl")
 
