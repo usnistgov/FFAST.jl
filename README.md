@@ -1,4 +1,6 @@
 # FFAST.jl
+## X-ray Mass Attenuation and Absorption Factors
+
 Implements in Julia an interpolation scheme for Chantler's FFAST X-Ray Form Factor, Attenuation, and Scattering Tables as downloaded from the [NIST FFAST web site](https://www.nist.gov/pml/x-ray-form-factor-attenuation-and-scattering-tables)
 
 Users should refer to the NIST website for a detailed discussion of the provenance of these values. In general, however, they are based on a self-consistent Dirac-Hartree-Fock framework.  Interpolated values of the f<sub>1</sub> and f<sub>2</sub> components of the form factors, the photoelectric attenuation coefficient for the atom, [µ/ρ]<sub>pe</sub>, the coherent and incoherent attenuation coefficient, [μ/ρ]<sub>ci</sub>, the total mass absorption coefficient [μ/ρ]<sub>tot</sub> and the value for the K-shell, [µ/ρ]<sub>K</sub> are made available through exported functions.
