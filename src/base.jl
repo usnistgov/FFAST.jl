@@ -31,6 +31,15 @@ FFASTData = loadFFAST()
 ffastShells = (:K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4, :N5, :N6, :N7, :O1, :O2, :O3, :O4, :O5, :O6, :O7, :O8, :O9)
 
 """
+    ffastElementCount(z::Int)
+
+The atomic number of the last element supported by the FFAST database.
+"""
+ffastElementCount(z::Int) =
+    length(FFASTData)
+
+
+"""
     ffastEdgeCount(z::Int)
 
 Returns the number of edge energy values available for the element identified by atomic number, z.
