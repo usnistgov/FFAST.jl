@@ -28,7 +28,7 @@ end
 
 
 plotFfastEdgeCount() =
-    Gadfly.plot(x = 1:92, y = length(ffastEdges.(1:92)),
+    Gadfly.plot(x = 1:92, y = length.(ffastEdges.(1:92)),
     Gadfly.Guide.title("Edge/Shell Count"),
     Gadfly.Guide.xlabel("Z"), Guide.ylabel("Shell count"))
 
