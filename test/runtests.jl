@@ -1,7 +1,7 @@
 using Test, FFAST
 
 @testset "Iron" begin
-    @test ffastEdgeCount(26) == 9
+    @test length(ffastEdges(26)) == 9
 
     @test ffastEdgeAvailable(26, 1)
     @test ffastEdgeAvailable(26, 2)
@@ -13,6 +13,10 @@ using Test, FFAST
     @test ffastEdgeAvailable(26, 8)
     @test ffastEdgeAvailable(26, 9)
     @test !ffastEdgeAvailable(26, 10)
+
+    @test !(10 in ffastEdges(26))
+    @test 2 in ffastEdges(26)
+    @test 7 in ffastEdges(26)
 
     @test ffastEdgeEnergy(26, 1) == 7112.0
     @test ffastEdgeEnergy(26, 9) == 3.6
@@ -45,7 +49,7 @@ end
 
 
 @testset "Oxygen" begin
-    @test ffastEdgeCount(8) == 4
+    @test length(ffastEdges(8)) == 4
 
     @test ffastEdgeAvailable(8, 1)
     @test ffastEdgeAvailable(8, 2)
@@ -90,7 +94,7 @@ end
 end
 
 @testset "Lead" begin
-    @test ffastEdgeCount(82) == 23
+    @test length(ffastEdges(82)) == 23
 
     @test ffastEdgeAvailable(82, 1)
     @test ffastEdgeAvailable(82, 2)
@@ -100,8 +104,10 @@ end
     @test ffastEdgeAvailable(82, 6)
     @test ffastEdgeAvailable(82, 7)
     @test ffastEdgeAvailable(82, 8)
-    @test ffastEdgeAvailable(82, 23)
-    @test !ffastEdgeAvailable(82, 24)
+    @test !ffastEdgeAvailable(82, 23)
+    @test !ffastEdgeAvailable(82, 25)
+    @test ffastEdgeAvailable(82, 26)
+    @test ffastEdgeAvailable(82, 27)
 
     @test isapprox(ffastMACpe(82, 30.0), 74494.9013, rtol = 0.001)
     @test isapprox(ffastMACpe(82, 102.0), 11406.5505, rtol = 0.001)

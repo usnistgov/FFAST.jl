@@ -3,6 +3,36 @@ using Gumbo
 using CSV
 using DataFrames
 
+sciNot = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?"
+numNot = r"[-+]?[0-9]*\.?[0-9]+"
+shellNot = r"[K-Q] (XII|XI|X|IX|VIII|VII|VI|V|IV|III|II|I)?"
+
+shellmap = (
+    "K ", "L I", "L II", "L III",
+    "M I", "M II", "M III", "M IV", "M V",
+    "N I", "N II", "N III", "N IV", "N V",
+    "N VI","N VII", "O I", "O II", "O III",
+    "O IV", "O V", "P I", "P II", "P III",
+)
+
+
+function parseEdges(dd)
+    lines = split(dd,"\n")
+    res = Vector{Any}(missing, length(shellmap))
+    for line in lines
+        if !isnothing(findfirst("24 edges", line))
+            continue
+        end
+        shells, energies = [], []
+        for (sh, num) in zip( eachmatch(shellNot, line), eachmatch(sciNot,line))
+            # println("Shell = $(sh.match), Number = $(num.match)")
+            res[findfirst(n->n==sh.match,shellmap)] = 1000.0*parse(Float64, num.match)
+        end
+        @assert length(shells) == length(energies)
+    end
+    return res
+end
+
 """
     scrape(z::Int)
 Scrapes FFAST data from the NIST website by downloading by element the
@@ -11,8 +41,6 @@ values.  Not exported as part of FFAST but provided to assist with downloading
 updated values if they should become available.
 """
 function scrape(z::Int)
-    sciNot = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?"
-    numNot = r"[-+]?[0-9]*\.?[0-9]+"
     parseSN(dd) = parse(Float64, match(sciNot, dd).match)
     parseN(dd) = parse(Float64, match(numNot, dd).match)
     multiSN(dd) = [ parse(Float64, m.match) for m in eachmatch(sciNot, dd) ]
@@ -20,11 +48,13 @@ function scrape(z::Int)
     doc = parsehtml(String(html.body))
     headerNode = doc.root[2][1]
     if z <= 2
-        shells = multiSN(headerNode[4][1].text)[2:end]
+        shells = Vector{Any}(missing, length(shellmap))
+        shells[1]= 1000.0*multiSN(headerNode[4][1].text)[2]
     else
-        shells = multiSN(headerNode[4][2][1].text)
+        shells = parseEdges(headerNode[4][2][1].text)
     end
-    data0 = zeros(Float64, 1, 7 + length(shells))
+    data0 = Array{Any}(missing, 1, 7 + length(shells))
+    data0[8:end] = shells
     data0[1,1] = parseN(headerNode[1][1][3].text) # A '=\n  54.93800 g mol'
     if z == 32
         data0[1,2] = parseSN(headerNode[2][7].text)
@@ -39,16 +69,17 @@ function scrape(z::Int)
     end
     if z <= 2
         rc = multiSN(headerNode[5][4].text)
-        data0[1,5], data0[1,6] = rc[length(rc) - 1:end] # # Reativistic correction '(H82,3/5CL) = -9.8594E-02, -6.1200E-02'
-        data0[7] = parseSN(headerNode[6][length(headerNode[6].children) - 3].text)
+        data0[1, 5], data0[1,6] = rc[length(rc) - 1:end] # # Reativistic correction '(H82,3/5CL) = -9.8594E-02, -6.1200E-02'
+        data0[1, 7] = parseSN(headerNode[6][length(headerNode[6].children) - 3].text)
     else
         rc = multiSN(headerNode[4][6].text)
-        data0[1,5], data0[1,6] = rc[length(rc) - 1:5] # # Relativistic correction '(H82,3/5CL) = -9.8594E-02, -6.1200E-02'
-        data0[7] = parseSN(headerNode[5][length(headerNode[5].children) - 3].text)
+        data0[1, 5], data0[1, 6] = rc[length(rc) - 1:5] # # Relativistic correction '(H82,3/5CL) = -9.8594E-02, -6.1200E-02'
+        data0[1, 7] = parseSN(headerNode[5][length(headerNode[5].children) - 3].text)
     end
-    for i in eachindex(shells) data0[1,7 + i] = 1000.0 * shells[i] end # in eV
-    shSym = [ :K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4, :N5, :N6, :N7, :O1, :O2, :O3, :O4, :O5, :O6, :O7, :O8, :O9   ]
-    df0 = DataFrame(data0, [ :A, :xsec, :density, :ev, :rc1, :rc2, :nt, shSym[1:length(shells)]...])
+    shSym = [ :K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5,
+        :N1, :N2, :N3, :N4, :N5, :N6, :N7,
+        :O1, :O2, :O3, :O4, :O5, :P1, :P2, :P3   ]
+    df0 = DataFrame(data0, [ :A, :xsec, :density, :ev, :rc1, :rc2, :nt, shSym...])
     CSV.write("c:\\Users\\nritchie\\.julia\\dev\\FFAST\\data\\data[$(z)].csv", df0)
 
     tableNode = doc.root[2][8][1][1]
@@ -70,3 +101,10 @@ function scrape(z::Int)
 end
 
 for z in 1:92 scrape(z) end
+
+df0=DataFrame( A=[],xsec=[],density=[],ev=[],rc1=[],rc2=[],nt=[],K=[],
+    L1=[], L2=[], L3=[], M1=[], M2=[], M3=[], M4=[], M5=[],
+    N1=[], N2=[], N3=[], N4=[], N5=[], N6=[], N7=[],
+    O1=[], O2=[], O3=[], O4=[], O5=[], P1=[], P2=[], P3=[]  )
+all = mapreduce(z->z == 0 ? df0 : CSV.read("c:\\Users\\nritchie\\.julia\\dev\\FFAST\\data\\data[$(z)].csv"),append!,0:92)
+CSV.write("c:\\Users\\nritchie\\.julia\\dev\\FFAST\\data\\shelldata.csv",all)

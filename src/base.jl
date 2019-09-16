@@ -1,14 +1,26 @@
 using DataFrames
 using CSV
 
+
 struct FFASTElement
     energy::Vector{Float64} # in eV
-    data::DataFrame # Supplemental data
+    data::Dict{Symbol, Float64}
+    edgeEnergies::Dict{Int, Float64}
     macs::DataFrame # Form factor and MAC data
     function FFASTElement(ev, sup, mac)
-        @assert all(ty->isequal(ty, Float64), eltypes(sup))
-        @assert all(ty->isequal(ty, Float64), eltypes(mac))
-        return new(ev, sup, mac)
+        ffastShells = ( :K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4,
+                        :N5, :N6, :N7, :O1, :O2, :O3, :O4, :O5, :P1, :P2, :P3 )
+        allshells = ( :K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4,
+                      :N5, :N6, :N7, :O1, :O2, :O3, :O4, :O5, :O6, :O7, :O8, :O9, :P1,
+                      :P2, :P3, :P4, :P5, :P6, :P7, :P8, :P9, :P10, :P11 )
+        data = Dict( ( sh, convert(Float64, sup[1,sh]) ) for sh in ( :A, :xsec, :density, :ev, :rc1, :rc2, :nt ) )
+        ee = Dict{Int, Float64}()
+        for sh in ffastShells
+            if !ismissing(sup[1,sh])
+                ee[findfirst(s->s==sh,allshells)] = convert(Float64, sup[1,sh])
+            end
+        end
+        return new(ev, data, ee, mac)
     end
 end
 
@@ -16,36 +28,35 @@ end
 function loadFFAST()::Vector{FFASTElement}
     path = dirname(pathof(@__MODULE__))
     res = Vector{FFASTElement}()
+    data = CSV.read("$(path)\\..\\data\\shelldata.csv")
     for z in 1:92
         # println("Loading z = $(z)")
-        data = CSV.read("$(path)\\..\\data\\data[$(z)].csv")
-        data = mapcols(x->convert.(Float64, x), data) # ensure Float64
         macs = CSV.read("$(path)\\..\\data\\mac[$(z)].csv")
         # mapcols(x->convert.(Float64,x), macs) # ensure Float64
-        push!(res, FFASTElement(1000.0 * macs[!,1], data, macs))
+        push!(res, FFASTElement(1000.0 * macs[!,1], data[[z],:], macs))
     end
     return res
 end
 
 FFASTData = loadFFAST()
-ffastShells = (:K, :L1, :L2, :L3, :M1, :M2, :M3, :M4, :M5, :N1, :N2, :N3, :N4, :N5, :N6, :N7, :O1, :O2, :O3, :O4, :O5, :O6, :O7, :O8, :O9)
 
 """
-    ffastElementCount()
+    ffastElementRange()
 
 The atomic number of the last element supported by the FFAST database.
 """
-ffastElementCount() =
-    length(FFASTData)
+ffastElementRange() =
+    1:length(FFASTData)
 
 
 """
-    ffastEdgeCount(z::Int)
+    ffastEdges(z::Int)
 
-Returns the number of edge energy values available for the element identified by atomic number, z.
+Returns a set containing the shells for which there is an edge energy in the database
+for the specified element.
 """
-ffastEdgeCount(z::Int) =
-    length(FFASTData[z].data[1,:]) - 7
+ffastEdges(z::Int) =
+    keys(FFASTData[z].edgeEnergies)
 
 """
     ffastEdgeAvailable(z::Int, shell::Int)
@@ -53,7 +64,7 @@ ffastEdgeCount(z::Int) =
 Is a value available for the specific shell's edge energy for the element identified by atomic number, z.
 """
 ffastEdgeAvailable(z::Int, shell::Int) =
-    shell <= ffastEdgeCount(z)
+    haskey(FFASTData[z].edgeEnergies, shell)
 
 """
     ffastEdgeEnergy(z::Int, shell::Int)
@@ -63,7 +74,7 @@ The edge energy (in eV) for the specific element and shell.  Chantler references
   2) Bearden, J.A., Burr, A.F., Rev. Mod. Phys. 39, 125-142 (1967).
 """
 ffastEdgeEnergy(z::Int, shell::Int) =
-    FFASTData[z].data[1,ffastShells[shell]]
+    FFASTData[z].edgeEnergies[shell]
 
 """
     ffastAtomicWeight(z::Int)
@@ -71,7 +82,7 @@ ffastEdgeEnergy(z::Int, shell::Int) =
 The mean atomic weight for the specified element.
 """
 ffastAtomicWeight(z::Int) =
-    FFASTData[z].data[1,:A]
+    FFASTData[z].data[:A]
 
 """
     ffastCrossSectionFactor(z::Int)
@@ -79,7 +90,7 @@ ffastAtomicWeight(z::Int) =
 The constant factor to convert [μ/ρ] to cross section in cm²/atom.
 """
 ffastCrossSectionFactor(z::Int) =
-    FFASTData[z].data[1,:xsec] * 1.0e-24
+    FFASTData[z].data[:xsec] * 1.0e-24
 
 """
     ffastDensity(z::Int)
@@ -87,7 +98,7 @@ ffastCrossSectionFactor(z::Int) =
 Nominal value of the density of the element.
 """
 ffastDensity(z::Int) =
-    FFASTData[z].data[1,:density]
+    FFASTData[z].data[:density]
 
 """
     ffastEV(z::Int)
@@ -97,7 +108,7 @@ E(eV) [μ/ρ](cm²/g) = f2(e/atom)  ×  ffastEV(z)
 Nominal value of the density of the element.
 """
 ffastEV(z::Int) =
-    FFASTData[z].data[1,:ev]
+    FFASTData[z].data[:ev]
 
 """
     ffastRelativisticCorrections(z::Int)
@@ -106,7 +117,7 @@ Relativistic correction estimates fᵣₑₗ(H82,3/5CL) in e/atom.
 Returns a tuple with two values.
 """
 ffastRelativisticCorrections(z::Int) =
-    (FFASTData[z].data[1,:rc1], FFASTData[z].data[1,:rc2])
+    ( FFASTData[z].data[:rc1], FFASTData[z].data[:rc2] )
 
 """
     ffastNuclearThompsonCorrection(z::Int)
@@ -114,7 +125,7 @@ ffastRelativisticCorrections(z::Int) =
 Nuclear Thomson correction fₙₜ</sub> in e/atom.
 """
 ffastNuclearThompsonCorrection(z::Int) =
-    FFASTData[z].data[1,:nt]
+    FFASTData[z].data[:nt]
 
 function binarySearch(array, value)
     start, stop = 1, length(array)

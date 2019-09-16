@@ -16,11 +16,11 @@ function ffastUncertaintiesMonatomicGas(z::Integer, energy)
     elseif energy < 1.0
         low, high = 0.03, 0.10
     end
-    distance = ( (energy - ffastEdgeEnergy(z, sh)) / energy for sh in 1:ffastEdgeCount(z) )
+    distance = ( (energy - ffastEdgeEnergy(z, sh)) / energy for sh in ffastEdges(z) )
     if minimum.(abs.(distance)) < 0.001
         low, high = max(low, 0.2), max(high, 0.3)
     end
-    u = ( energy / ffastEdgeEnergy(z, sh) for sh in 1:ffastEdgeCount(z) )
+    u = ( energy / ffastEdgeEnergy(z, sh) for sh in ffastEdges(z) )
     if (u[1] > 1.0) && (u[1] < 1.1)
         low, high = max(low, 0.1), max(high, 0.1)
     elseif (u[1] >= 1.1) && (u[1] < 1.2)
@@ -65,11 +65,11 @@ function ffastUncertaintiesSolidLiquid(z::Integer, energy)
     elseif energy < 1.0
         low, high = 0.05, 0.20
     end
-    distance = ( (energy - ffastEdgeEnergy(z, sh)) / energy for sh in 1:ffastEdgeCount(z) )
+    distance = ( (energy - ffastEdgeEnergy(z, sh)) / energy for sh in ffastEdges(z) )
     if minimum.(abs.(distance)) < 0.001
         low, high = max(low, 0.5), max(high, 0.5)
     end
-    u = ( energy / ffastEdgeEnergy(z, sh) for sh in 1:ffastEdgeCount(z) )
+    u = ( energy / ffastEdgeEnergy(z, sh) for sh in ffastEdges(z) )
     if (u[1] > 1.0) && (u[1] < 1.1)
         low, high = max(low, 0.1), max(high, 0.2)
     elseif (u[1] >= 1.1) && (u[1] < 1.2)

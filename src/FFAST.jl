@@ -6,8 +6,8 @@ using CSV
 
 include("base.jl")
 
-export ffastElementCount
-export ffastEdgeCount
+export ffastElementRange
+export ffastEdges
 export ffastEdgeAvailable
 export ffastEdgeEnergy
 export ffastAtomicWeight
