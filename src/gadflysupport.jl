@@ -65,3 +65,9 @@ plotFfastNuclearThompsonCorrection() =
     Gadfly.plot(x = 1:92, y = ffastNuclearThompsonCorrection.(1:92),
         Gadfly.Guide.title("Nuclear Thompson Correction"),
         Gadfly.Guide.xlabel("Z"), Guide.ylabel("e/atom"))
+
+
+plotFfastJumpRatios(shell::Int) =
+    Gadfly.plot(x = 1:92, y = ffastJumpRatio.(1:92,shell),
+        Gadfly.Guide.title("Jump Ratio"),
+        Gadfly.Guide.xlabel("Z"), Guide.ylabel("Ratio"))

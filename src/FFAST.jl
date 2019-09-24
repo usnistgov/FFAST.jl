@@ -21,6 +21,8 @@ export ffastMACpe # photoelectric mass absorption coefficient
 export ffastMACci # coherent/incoherent mass attenuation coefficient
 export ffastMACtot # sum mass attenuation coefficient
 export ffastMACK # K-shell contribution to the total mass attenuation coefficient
+export ffastJumpRatio # Ratio of the height after the edge over before the edge
+
 
 include("uncertainties.jl")
 export ffastUncertaintiesSolidLiquid # Fractional uncertainties for a solid or liquid
@@ -38,5 +40,5 @@ export plotFfastCrossSectionFactor # Plot crossection factor.  Only available if
 export plotFfastDensity # Plot nominal density.  Only available if Gadfly is loaded.
 export plotFfastRelativisticCorrections # Plot the relativistic corretion factors.  Only available if Gadfly is loaded.
 export plotFfastNuclearThompsonCorrection # Plot the nuclear Thompson correction.  Only available if Gadfly is loaded.
-
+export plotFfastJumpRatios # Plot the jump ratios for the specified shell
 end

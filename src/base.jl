@@ -139,8 +139,8 @@ end
 
 function ffastIndex(z::Int, energy::Float64)
     df = FFASTData[z].macs
-    @assert(energy >= 1000.0 * df[1,:E], "Energy too small in ffastMAC")
-    @assert(energy <= 1000.0 * df[end,:E], "Energy too large in ffastMAC")
+    @assert(energy >= FFASTData[z].energy[1], "Energy too small in ffastMAC")
+    @assert(energy <= FFASTData[z].energy[end], "Energy too large in ffastMAC")
     return binarySearch(FFASTData[z].energy, energy)
 end
 
@@ -204,4 +204,32 @@ function ffastMACK(z::Int, energy::Float64)
     idx = ffastIndex(z, energy)
     ffd = FFASTData[z]
     return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], FFASTData[z].macs[idx,:μρK], FFASTData[z].macs[idx + 1,:μρK], energy)
+end
+
+
+"""
+    ffastJumpRatio(z::Int, shell::Int)
+
+Returns the jump-ratio for the specified element and shell.  This uses a simple
+algorithm in which we look just above and just below the shell edge to
+determine the height of the edge.  Returns zero if the edge isn't available.
+"""
+function ffastJumpRatio(z::Int, shell::Int)
+    if ffastEdgeAvailable(z, shell)
+        ee = ffastEdgeEnergy(z, shell)
+        if ee > FFASTData[z].energy[1]
+            if ffastEdgeAvailable(z, shell+1) && (ee == ffastEdgeEnergy(z, shell+1))
+                # Clean up some ugliness!!!
+                if shell == 3
+                    return 1.41
+                elseif shell == 4
+                    return 1.16
+                end
+            end
+            idx = ffastIndex(z, ee)
+            ffd = FFASTData[z]
+            return ffd.macs[idx+1,:μρpe] / ffd.macs[idx,:μρpe]
+        end
+    end
+    return 0.0
 end
