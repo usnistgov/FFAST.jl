@@ -139,9 +139,9 @@ end
 
 function ffastIndex(z::Int, energy::Float64)
     df = FFASTData[z].macs
-    @assert energy >= FFASTData[z].energy[1] "Energy too small in ffastMAC"
+    @assert energy >= 0.0 "energy < 0.0 in ffastMAC"
     @assert energy <= FFASTData[z].energy[end] "Energy too large in ffastMAC"
-    return binarySearch(FFASTData[z].energy, energy)
+    return binarySearch(FFASTData[z].energy, max(FFASTData[z].energy[1], energy))
 end
 
 linearInterp(x1, x2, y1, y2, x) =
