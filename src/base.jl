@@ -28,10 +28,10 @@ end
 function loadFFAST()::Vector{FFASTElement}
     path = dirname(pathof(@__MODULE__))
     res = Vector{FFASTElement}()
-    data = CSV.read("$(path)\\..\\data\\shelldata.csv")
+    data = CSV.read(joinpath("$(path)","..","data","shelldata.csv"), header=1)
     for z in 1:92
         # println("Loading z = $(z)")
-        macs = CSV.read("$(path)\\..\\data\\mac[$(z)].csv")
+        macs = CSV.read(joinpath("$(path)","..","data","mac[$(z)].csv"), header=1)
         # mapcols(x->convert.(Float64,x), macs) # ensure Float64
         push!(res, FFASTElement(1000.0 * macs[!,1], data[[z],:], macs))
     end
