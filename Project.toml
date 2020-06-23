@@ -2,7 +2,7 @@ name = "FFAST"
 uuid = "10506e09-08cd-5f0b-aee5-631de1bcc925"
 authors = ["nritchie <nicholas.ritchie@nist.gov>"]
 repo-url = "https://github.com/usnistgov/FFAST.jl"
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

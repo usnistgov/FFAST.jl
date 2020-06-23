@@ -27,6 +27,10 @@ If you use this library please be sure to adequately reference:
     * relativistic corrections
     * nuclear Thompson correction
 
+## Usage
+Examples of how to use the major exported methods can be found [here](example.html).
+
+## Method Documentation
 ```@autodocs
 Modules = [FFAST]
 ```
