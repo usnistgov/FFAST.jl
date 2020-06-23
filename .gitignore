@@ -4,5 +4,6 @@
 deps/deps.jl
 docs/build/*
 docs/src/jl_*
+docs/src/figures/*
 docs/src/*.html
 Manifest.toml

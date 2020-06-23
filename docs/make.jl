@@ -3,8 +3,18 @@ using Gadfly
 using FFAST
 using Weave
 
-weave("src/example.jmd", out_path="src/example.html")
+weaveit(name) = weave(joinpath("src", "$name"), out_path=joinpath("src", "$(splitext(name)[1]).md"), doctype="github")
 
-makedocs(modules = [FFAST], sitename = "FFAST.jl")
+names = ( "example.jmd", )
+
+weaveit.(names)
+
+makedocs(
+    modules = [FFAST],
+    sitename = "FFAST.jl",
+    pages = [ "Home" => "index.md", "Using FFAST" => "example.md" ]
+)
+
+map(name->rm(joinpath("src","$(splitext(name)[1]).md")), names)
 
 # deploydocs(repo = "github.com/NicholasWMRitchie/FFAST.jl.git")
