@@ -1,0 +1,112 @@
+# Using FFAST.jl
+### A lean wrapper for Chantler's FFAST MAC database
+
+FFAST is the X-ray form factor and mass absorption coefficient (MAC) database developed by [Chantler *et al*](https://dx.doi.org/10.18434/T4HS32)
+and made available through the [NIST website](https://physics.nist.gov/PhysRefData/FFast/html/form.html). The MACs and
+form factors were calculated using a self-consistent Dirac-Hartree-Fock framework.
+
+```bibtex
+@article{chantler2005attenuation,
+  title={Attenuation and Scattering Tables},
+  author={Chantler, CT and Olsen, K and Dragoset, RA and Chang, J and Kishore, AR and Kotochigova, SA and Zucker, DS and Factor, X-Ray Form},
+  journal={Detailed Tabulation of Atomic Form Factors, Photoelectric Absorption and Scattering Cross Section, and Mass Attenuation Coefficients for Z = 1-92 from E = 1-10 eV to E = 0.4-1.0 MeV},
+  number={1-92},
+  pages={1--10},
+  year={2005}
+}
+```
+
+Reliable use of this dataset requires a self-consistent set of atomic parameters like edge energy so this library provides methods to access these values.
+
+```julia
+using FFAST
+```
+The range of atomic numbers supported by FFAST.
+```julia
+eachelement(FFASTMAC)
+```
+
+Let's find out which edge energies are available and tabulate them using
+`hasedge(FFASTMAC, z, sh)` and `edgeenergy(FFASTMAC, z, sh)`.
+
+The fullest extent of lines available for any element is K, L₁, L₂, ..., P₁₁ or
+integer indices 1:36
+
+```julia
+edges = [
+    [ (ss, edgeenergy(FFASTMAC, z, ss)) for ss in filter(ss->hasedge(FFASTMAC, z, ss),1:36) ] for z in eachelement(FFASTMAC)
+]
+```
+
+FFAST is primarily a mass absorption coefficient database.  There are three primary
+methods for various different physical processes.  `mac(FFASTMAC, PhotoElectricMAC, z, e)` computes the
+photoelectric coefficient, `mac(FFASTMAC, CoherentIncoherentMAC, z, e)` computes the coherent/incoherent
+coefficient and `mac(FFASTMAC, TotalMAC, z, e)` computer the sum of all contributions.
+
+The MAC is a function of the absorber element and the X-ray energy.
+```julia
+mac(FFASTMAC, PhotoElectricMAC, 6, 1000.0), mac(FFASTMAC, CoherentIncoherentMAC, 6, 1000.0), mac(FFASTMAC, TotalMAC, 6, 1000.0)
+```
+```julia
+mac(FFASTMAC, PhotoElectricMAC, 26, 1000.0), mac(FFASTMAC, CoherentIncoherentMAC, 26, 1000.0), mac(FFASTMAC, TotalMAC, 26, 1000.0)
+```
+```julia
+mac(FFASTMAC, PhotoElectricMAC, 86, 1000.0), mac(FFASTMAC, CoherentIncoherentMAC, 86, 1000.0), mac(FFASTMAC, TotalMAC, 86, 1000.0)
+```
+
+There are also methods to calculate the contribution due to photoelectric
+absorption by the K-shell.
+```julia
+mac(FFASTMAC, KMAC,6, 1.1*edgeenergy(FFASTMAC, 6, 1)), mac(FFASTMAC, KMAC, 26, 1.1*edgeenergy(FFASTMAC, 26, 1)), mac(FFASTMAC, KMAC, 86, 1.1*edgeenergy(FFASTMAC, 86, 1))
+```
+This term is zero below the K edge since photoelectric absorption is energetically forbidden.
+```julia
+mac(FFASTMAC, KMAC,6, 0.9*edgeenergy(FFASTMAC, 6, 1)), mac(FFASTMAC, KMAC, 26, 0.9*edgeenergy(FFASTMAC, 26, 1)), mac(FFASTMAC, KMAC, 86, 0.9*edgeenergy(FFASTMAC, 86, 1))
+```
+
+FFAST has optional support (using the Requires module) for the Gadfly plotting library.  While FFAST does not
+require Gadfly and will not load it itself, if Gadfly has been loaded into the Julia session
+these additional plotting functions are made available.
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+using Gadfly   #
+display(plot(FFASTMAC, 6))
+display(plot(FFASTMAC, 26))
+display(plot(FFASTMAC, 86))
+```
+
+Plot the form factors for C, Iron and Radon.
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+display(plotFormFactors(FFASTMAC, 6))
+display(plotFormFactors(FFASTMAC, 26))
+display(plotFormFactors(FFASTMAC, 86))
+```
+
+Plot the number and last available edge for each element.
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+plotEdgeCount(FFASTMAC)
+```
+
+Plot the atomic weight of each element.
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+plotAtomicWeight(FFASTMAC)
+```
+
+Plot the nominal density (g/cm³) for each element.
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+plotDensity(FFASTMAC)
+```
+
+The next three plots show scaling and correction factors.
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+plotCrossSectionFactor(FFASTMAC)
+```
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+plotRelativisticCorrection(FFASTMAC)
+```
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+plotNuclearThompsonCorrection(FFASTMAC)
+```
+Plot the jump-ratio for the K shell (shell=1)
+```julia; fig_width=8; fig_height-=4; fig_ext=".svg"
+display(plotJumpRatios(FFASTMAC, 1))
+```
