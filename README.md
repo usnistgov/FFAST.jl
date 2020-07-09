@@ -1,6 +1,15 @@
 # FFAST.jl
 ## X-ray Mass Attenuation and Absorption Factors
-![Build Badge](https://travis-ci.com/usnistgov/FFAST.jl.svg?branch=master)
+
+| **Documentation**                        | **Build Status**                  |
+|:----------------------------------------:|:---------------------------------:|
+| [![][docs-stable-img]][docs-stable-url]  | [![][travis-img]][travis-url]     |
+
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://pages.nist.gov/FFAST.jl
+[travis-img]: https://travis-ci.com/usnistgov/FFAST.jl.svg?branch=master
+[travis-url]: https://travis-ci.com/usnistgov/FFAST.jl
 
 Implements in Julia an interpolation scheme for Chantler's FFAST X-Ray Form Factor, Attenuation, and Scattering Tables as downloaded from the [NIST FFAST web site](https://www.nist.gov/pml/x-ray-form-factor-attenuation-and-scattering-tables)
 
