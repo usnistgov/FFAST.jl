@@ -29,7 +29,7 @@ function loadFFAST()::NTuple{92,FFASTElement}
     shelldata = CSV.read(joinpath(path,"..","data","shelldata.csv"), DataFrame, header=1)
     for z in 1:92
         # println("Loading z = $(z)")
-        macs = CSV.read(joinpath(path,"..","data","mac[$(z)].csv", DataFrame, header=1))
+        macs = CSV.read(joinpath(path,"..","data","mac[$(z)].csv"), DataFrame, header=1)
         # mapcols(x->convert.(Float64,x), macs) # ensure Float64
         push!(res, FFASTElement(1000.0 * macs[!,1], shelldata[[z],:], macs))
     end
