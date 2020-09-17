@@ -4,10 +4,6 @@ using Requires
 using DataFrames
 using CSV
 
-# This type is used to identify the algorithm implementation to facilitate replacing one
-# or more of the method implementations.
-struct FFASTMAC end
-
 # This type identifies the class of MAC to compute
 abstract type MassAbsorptionCoefficientType end
 # photoelectric mass absorption coefficient
@@ -28,7 +24,6 @@ struct MonatomicGas <: MACUncertaintyType end
 
 include("base.jl")
 
-export FFASTMAC
 export eachelement
 export eachedge
 export hasedge
