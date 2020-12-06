@@ -53,6 +53,8 @@ eachelement(::Type{FFASTMAC}) = eachindex(getFFASTData())
 
 Returns a set containing the shells for which there is an edge energy in the database
 for the specified element.
+
+Fail fast: Throws an exception when the element is not available.
 """
 eachedge(::Type{FFASTMAC},z::Int) = keys(getFFASTData()[z].edgeEnergies)
 
@@ -60,6 +62,8 @@ eachedge(::Type{FFASTMAC},z::Int) = keys(getFFASTData()[z].edgeEnergies)
     hasedge(::Type{FFASTMAC}, z::Int, shell::Int)::Bool
 
 Is a value available for the specific shell's edge energy for the element identified by atomic number, z.
+
+Fail fast: Throws an exception when the element is not available.
 """
 hasedge(::Type{FFASTMAC},z::Int, shell::Int) = haskey(getFFASTData()[z].edgeEnergies, shell)
 
@@ -69,6 +73,8 @@ hasedge(::Type{FFASTMAC},z::Int, shell::Int) = haskey(getFFASTData()[z].edgeEner
 The edge energy (in eV) for the specific element and shell.  Chantler references these sources for the values
   1) Bearden, J.A., Rev. Mod. Phys. 39, 78-124 (1967).
   2) Bearden, J.A., Burr, A.F., Rev. Mod. Phys. 39, 125-142 (1967).
+
+  Fail fast: Throws an exception when the data is not available.
 """
 edgeenergy(::Type{FFASTMAC},z::Int, shell::Int) = getFFASTData()[z].edgeEnergies[shell]
 
@@ -76,6 +82,8 @@ edgeenergy(::Type{FFASTMAC},z::Int, shell::Int) = getFFASTData()[z].edgeEnergies
     atomicweight(::Type{FFASTMAC}, z::Int)::Float64
 
 The mean atomic weight for the specified element.
+
+Fail fast: Throws an exception when the data is not available.
 """
 atomicweight(::Type{FFASTMAC},z::Int) = getFFASTData()[z].data[:A]
 
@@ -83,6 +91,8 @@ atomicweight(::Type{FFASTMAC},z::Int) = getFFASTData()[z].data[:A]
     crosssectionfactor(::Type{FFASTMAC}, z::Int)::Float64
 
 The constant factor to convert [μ/ρ] to cross section in cm²/atom.
+
+Fail fast: Throws an exception when the data is not available.
 """
 crosssectionfactor(::Type{FFASTMAC}, z::Int) = getFFASTData()[z].data[:xsec] * 1.0e-24
 
