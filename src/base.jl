@@ -26,10 +26,10 @@ end
 function loadFFAST()::NTuple{92,FFASTElement}
     path = dirname(pathof(@__MODULE__))
     res = Vector{FFASTElement}()
-    shelldata = DataFrame!(CSV.File(joinpath("$(path)","..","data","shelldata.csv"), header=1))
+    shelldata = CSV.read(joinpath(path,"..","data","shelldata.csv"), DataFrame, header=1)
     for z in 1:92
         # println("Loading z = $(z)")
-        macs = DataFrame!(CSV.File(joinpath("$(path)","..","data","mac[$(z)].csv"), header=1))
+        macs = CSV.read(joinpath(path,"..","data","mac[$(z)].csv"), DataFrame, header=1)
         # mapcols(x->convert.(Float64,x), macs) # ensure Float64
         push!(res, FFASTElement(1000.0 * macs[!,1], shelldata[[z],:], macs))
     end
@@ -45,30 +45,30 @@ end
 
 The range of available elements.
 """
-eachelement(::Type{FFASTMAC}) = eachindex(getFFASTData())
+eachelement() = eachindex(getFFASTData())
 
 
 """
-    eachedge(::Type{FFASTMAC}, z::Int)::Set{Integer}
+    eachedge(z::Int)::Set{Integer}
 
 Returns a set containing the shells for which there is an edge energy in the database
 for the specified element.
 
 Fail fast: Throws an exception when the element is not available.
 """
-eachedge(::Type{FFASTMAC},z::Int) = keys(getFFASTData()[z].edgeEnergies)
+eachedge(z::Int) = keys(getFFASTData()[z].edgeEnergies)
 
 """
-    hasedge(::Type{FFASTMAC}, z::Int, shell::Int)::Bool
+    hasedge(z::Int, shell::Int)::Bool
 
 Is a value available for the specific shell's edge energy for the element identified by atomic number, z.
 
 Fail fast: Throws an exception when the element is not available.
 """
-hasedge(::Type{FFASTMAC},z::Int, shell::Int) = haskey(getFFASTData()[z].edgeEnergies, shell)
+hasedge(z::Int, shell::Int) = haskey(getFFASTData()[z].edgeEnergies, shell)
 
 """
-    edgeenergy(::Type{FFASTMAC}, z::Int, shell::Int)::Float64
+    edgeenergy(z::Int, shell::Int)::Float64
 
 The edge energy (in eV) for the specific element and shell.  Chantler references these sources for the values
   1) Bearden, J.A., Rev. Mod. Phys. 39, 78-124 (1967).
@@ -76,56 +76,56 @@ The edge energy (in eV) for the specific element and shell.  Chantler references
 
   Fail fast: Throws an exception when the data is not available.
 """
-edgeenergy(::Type{FFASTMAC},z::Int, shell::Int) = getFFASTData()[z].edgeEnergies[shell]
+edgeenergy(z::Int, shell::Int) = getFFASTData()[z].edgeEnergies[shell]
 
 """
-    atomicweight(::Type{FFASTMAC}, z::Int)::Float64
+    atomicweight(z::Int)::Float64
 
 The mean atomic weight for the specified element.
 
 Fail fast: Throws an exception when the data is not available.
 """
-atomicweight(::Type{FFASTMAC},z::Int) = getFFASTData()[z].data[:A]
+atomicweight(z::Int) = getFFASTData()[z].data[:A]
 
 """
-    crosssectionfactor(::Type{FFASTMAC}, z::Int)::Float64
+    crosssectionfactor(z::Int)::Float64
 
 The constant factor to convert [μ/ρ] to cross section in cm²/atom.
 
 Fail fast: Throws an exception when the data is not available.
 """
-crosssectionfactor(::Type{FFASTMAC}, z::Int) = getFFASTData()[z].data[:xsec] * 1.0e-24
+crosssectionfactor(z::Int) = getFFASTData()[z].data[:xsec] * 1.0e-24
 
 """
-    density(::Type{FFASTMAC}, z::Int)::Float64
+    density(z::Int)::Float64
 
 Nominal value of the density of the element in g/cm³.
 """
-density(::Type{FFASTMAC},z::Int) = getFFASTData()[z].data[:density]
+density(z::Int) = getFFASTData()[z].data[:density]
 
 """
-    EV(::Type{FFASTMAC}, z::Int)::Float64
+    EV(z::Int)::Float64
 
-E(eV) [μ/ρ] in cm²/g = f₂(e/atom) ⋅ EV(::Type{FFASTMAC}, z)
+E(eV) [μ/ρ] in cm²/g = f₂(e/atom) ⋅ EV(z)
 
 Conversion factor for the f₂ form factor.
 """
-EV(::Type{FFASTMAC}, z::Int) = getFFASTData()[z].data[:ev]
+EV(z::Int) = getFFASTData()[z].data[:ev]
 
 """
-    relativisticcorrection(::Type{FFASTMAC}, z::Int)::Tuple{Float64,Float64}
+    relativisticcorrection(z::Int)::Tuple{Float64,Float64}
 
 Relativistic correction estimates fᵣₑₗ(H82,3/5CL) in e/atom.
 Returns a tuple with two values.
 """
-relativisticcorrection(::Type{FFASTMAC},z::Int) = ( getFFASTData()[z].data[:rc1], getFFASTData()[z].data[:rc2] )
+relativisticcorrection(z::Int) = ( getFFASTData()[z].data[:rc1], getFFASTData()[z].data[:rc2] )
 
 """
-    nuclearthompsoncorrection(::Type{FFASTMAC}, z::Int)::Float64
+    nuclearthompsoncorrection(z::Int)::Float64
 
 Nuclear Thomson correction fₙₜ</sub> in e/atom.
 """
-nuclearthompsoncorrection(::Type{FFASTMAC}, z::Int) = getFFASTData()[z].data[:nt]
+nuclearthompsoncorrection(z::Int) = getFFASTData()[z].data[:nt]
 
 function findindex(z::Int, energy::Float64)
     function binarysearch(array, value)
@@ -154,7 +154,7 @@ loglogInterp(x0, x1, y0, y1, x) =
 
 Returns a tuple containing the form factors for the specified element and X-ray energy (in eV).
 """
-function formfactors(::Type{FFASTMAC}, z::Int, energy::Float64)
+function formfactors(z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
     return (loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:f1], getFFASTData()[z].macs[idx + 1,:f1], energy),
@@ -162,64 +162,64 @@ function formfactors(::Type{FFASTMAC}, z::Int, energy::Float64)
 end
 
 """
-    mac(::Type{FFASTMAC}, ::Type{PhotoElectricMAC}, z::Int, energy::Float64)::Float64
+    mac(::Type{PhotoElectricMAC}, z::Int, energy::Float64)::Float64
 
 Returns the photoelectric attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
-function mac(::Type{FFASTMAC}, ::Type{PhotoElectricMAC}, z::Int, energy::Float64)
+function mac(::Type{PhotoElectricMAC}, z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
     return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρpe], getFFASTData()[z].macs[idx + 1,:μρpe], energy)
 end
 
 """
-    mac(::Type{FFASTMAC}, ::Type{CoherentIncoherentMAC}, z::Int, energy::Float64)::Float64
+    mac(::Type{CoherentIncoherentMAC}, z::Int, energy::Float64)::Float64
 
 Returns the coherent/incoherent attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
-function mac(::Type{FFASTMAC}, ::Type{CoherentIncoherentMAC}, z::Int, energy::Float64)
+function mac(::Type{CoherentIncoherentMAC}, z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
     return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρci], getFFASTData()[z].macs[idx + 1,:μρci], energy)
 end
 
 """
-    mac(::Type{FFASTMAC}, ::Type{TotalMAC}, z::Int, energy::Float64)::Float64
+    mac(::Type{TotalMAC}, z::Int, energy::Float64)::Float64
 
 Returns the total attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
-function mac(::Type{FFASTMAC}, ::Type{TotalMAC} ,z::Int, energy::Float64)
+function mac(::Type{TotalMAC} ,z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
     return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρtot], getFFASTData()[z].macs[idx + 1,:μρtot], energy)
 end
 
 """
-    mac(::Type{FFASTMAC}, ::Type{KMAC}, z::Int, energy::Float64)::Float64
+    mac(::Type{KMAC}, z::Int, energy::Float64)::Float64
 
 Returns the K-shell only attenuation coefficient in cm²/g for the specified element and X-ray energy (in eV).
 """
-function mac(::Type{FFASTMAC}, ::Type{KMAC} ,z::Int, energy::Float64)
+function mac(::Type{KMAC} ,z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
-    return energy > edgeenergy(FFASTMAC,z,1) ?
+    return energy > edgeenergy(z,1) ?
         loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρK], getFFASTData()[z].macs[idx + 1,:μρK], energy) :
         0.0
 end
 
 """
-    jumpratio(::Type{FFASTMAC}, z::Int, shell::Int)::Float64
+    jumpratio(z::Int, shell::Int)::Float64
 
 Returns the jump-ratio for the specified element and shell.  This implementation attempts
 to use the FFAST MAC data to extract the jump-ratio. It uses a simple
 algorithm in which we look just above and just below the shell edge to
 determine the height of the edge.  Returns zero if the edge isn't available.
 """
-function jumpratio(::Type{FFASTMAC}, z::Int, shell::Int)::Float64
-    if hasedge(FFASTMAC,z, shell)
-        ee = edgeenergy(FFASTMAC,z, shell)
+function jumpratio( z::Int, shell::Int)::Float64
+    if hasedge(z, shell)
+        ee = edgeenergy(z, shell)
         if ee > getFFASTData()[z].energy[1]
-            if hasedge(FFASTMAC,z, shell+1) && (ee == edgeenergy(FFASTMAC, z, shell+1))
+            if hasedge(z, shell+1) && (ee == edgeenergy(z, shell+1))
                 # Clean up some ugliness!!!
                 if shell == 3
                     return 1.41
