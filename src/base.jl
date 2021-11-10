@@ -137,10 +137,10 @@ function findindex(z::Int, energy::Float64)
         end
         return start
     end
-    df = getFFASTData()[z].macs
+    df = getFFASTData()[z]
     @assert energy >= 0.0 "energy < 0.0 in ffastMAC"
-    @assert energy <= getFFASTData()[z].energy[end] "Energy too large in ffastMAC"
-    return binarysearch(getFFASTData()[z].energy, max(getFFASTData()[z].energy[1], energy))
+    @assert energy <= df.energy[end] "Energy too large in ffastMAC"
+    return binarysearch(df.energy, max(df.energy[1], energy))
 end
 
 linearInterp(x1, x2, y1, y2, x) =
@@ -157,8 +157,8 @@ Returns a tuple containing the form factors for the specified element and X-ray 
 function formfactors(z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
-    return (loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:f1], getFFASTData()[z].macs[idx + 1,:f1], energy),
-             loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:f2], getFFASTData()[z].macs[idx + 1,:f2], energy))
+    return (loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], ffd.macs[idx,:f1], ffd.macs[idx + 1,:f1], energy),
+             loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], ffd.macs[idx,:f2], ffd.macs[idx + 1,:f2], energy))
 end
 
 """
@@ -169,7 +169,9 @@ Returns the photoelectric attenuation coefficient in cm²/g for the specified el
 function mac(::Type{PhotoElectricMAC}, z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
-    return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρpe], getFFASTData()[z].macs[idx + 1,:μρpe], energy)
+    return ffd.macs[idx, :μρpe] > 0 ? #
+        loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], ffd.macs[idx,:μρpe], ffd.macs[idx + 1,:μρpe], energy) : #
+        0.0
 end
 
 """
@@ -180,7 +182,7 @@ Returns the coherent/incoherent attenuation coefficient in cm²/g for the specif
 function mac(::Type{CoherentIncoherentMAC}, z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
-    return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρci], getFFASTData()[z].macs[idx + 1,:μρci], energy)
+    return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], ffd.macs[idx,:μρci], ffd.macs[idx + 1,:μρci], energy)
 end
 
 """
@@ -191,7 +193,7 @@ Returns the total attenuation coefficient in cm²/g for the specified element an
 function mac(::Type{TotalMAC} ,z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
-    return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρtot], getFFASTData()[z].macs[idx + 1,:μρtot], energy)
+    return loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], ffd.macs[idx,:μρtot], ffd.macs[idx + 1,:μρtot], energy)
 end
 
 """
@@ -203,7 +205,7 @@ function mac(::Type{KMAC} ,z::Int, energy::Float64)
     idx = findindex(z, energy)
     ffd = getFFASTData()[z]
     return energy > edgeenergy(z,1) ?
-        loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], getFFASTData()[z].macs[idx,:μρK], getFFASTData()[z].macs[idx + 1,:μρK], energy) :
+        loglogInterp(ffd.energy[idx], ffd.energy[idx + 1], ffd.macs[idx,:μρK], ffd.macs[idx + 1,:μρK], energy) :
         0.0
 end
 
