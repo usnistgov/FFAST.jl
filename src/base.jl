@@ -208,9 +208,9 @@ function mac(::Type{KMAC} ,z::Int, energy::Float64)
 end
 
 """
-    jumpratio(z::Int, shell::Int)::Float64
+    jumpratio(z::Int, subshell::Int)::Float64
 
-Returns the jump-ratio for the specified element and shell.  This implementation is
+Returns the jump-ratio for the specified element and subshell.  This implementation is
 based on jump ratio data extracted from FFAST taken from
 https://github.com/openmicroanalysis/calczaf/blob/master/jump_ratios.dat.
 Returns 1.0 if data isn't available.
